@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floor Plan 3D Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+        }
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 8px;
+            color: white;
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+        }
+        #controls h2 {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #ccc;
+        }
+        .control-group input[type="range"] {
+            width: 100%;
+        }
+        .control-group button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            background: #4CAF50;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .control-group button:hover {
+            background: #45a049;
+        }
+        #info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: white;
+            font-size: 12px;
+        }
+        .value-display {
+            display: inline-block;
+            margin-left: 10px;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <div id="controls">
+        <h2>🏢 Building Viewer</h2>
+
+        <div class="control-group">
+            <label>Time of Day: <span class="value-display" id="time-display">12:00</span></label>
+            <input type="range" id="time-slider" min="0" max="24" step="0.5" value="12">
+        </div>
+
+        <div class="control-group">
+            <label>Date: <span class="value-display" id="date-display"></span></label>
+            <input type="date" id="date-picker">
+        </div>
+
+        <div class="control-group">
+            <label>Floor Visibility</label>
+            <button id="toggle-floor-1">Floor 1: ON</button>
+            <button id="toggle-floor-2">Floor 2: ON</button>
+            <button id="toggle-roof">Roof: ON</button>
+        </div>
+
+        <div class="control-group">
+            <button id="reset-camera">Reset Camera</button>
+        </div>
+    </div>
+
+    <div id="info">
+        <strong>Controls:</strong> WASD/Arrow Keys = Move | Mouse = Look | Space = Up | Shift = Down
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>

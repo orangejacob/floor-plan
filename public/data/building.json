@@ -1,0 +1,301 @@
+{
+  "version": "1.0",
+  "floors": [
+    {
+      "id": "floor-1",
+      "floor_number": 1,
+      "base_height": 0.0,
+      "height": 3.0,
+      "walls": [
+        {
+          "start": [
+            -6.0,
+            -5.0
+          ],
+          "end": [
+            6.0,
+            -5.0
+          ],
+          "thickness": 0.2
+        },
+        {
+          "start": [
+            6.0,
+            -5.0
+          ],
+          "end": [
+            6.0,
+            5.0
+          ],
+          "thickness": 0.2
+        },
+        {
+          "start": [
+            6.0,
+            5.0
+          ],
+          "end": [
+            -6.0,
+            5.0
+          ],
+          "thickness": 0.2
+        },
+        {
+          "start": [
+            -6.0,
+            5.0
+          ],
+          "end": [
+            -6.0,
+            -5.0
+          ],
+          "thickness": 0.2
+        }
+      ],
+      "windows": [
+        {
+          "position": [
+            -2.4000000000000004,
+            -5.0
+          ],
+          "width": 1.5,
+          "height": 1.2,
+          "sill_height": 1.0,
+          "rotation": 0.0
+        },
+        {
+          "position": [
+            2.3999999999999986,
+            -5.0
+          ],
+          "width": 1.5,
+          "height": 1.2,
+          "sill_height": 1.0,
+          "rotation": 0.0
+        },
+        {
+          "position": [
+            6.0,
+            0.0
+          ],
+          "width": 1.5,
+          "height": 1.2,
+          "sill_height": 1.0,
+          "rotation": 1.5707963267948966
+        },
+        {
+          "position": [
+            0.0,
+            5.0
+          ],
+          "width": 1.5,
+          "height": 1.2,
+          "sill_height": 1.0,
+          "rotation": 3.141592653589793
+        }
+      ],
+      "doors": [
+        {
+          "position": [
+            0.0,
+            -5.0
+          ],
+          "width": 0.9,
+          "height": 2.1,
+          "rotation": 0.0
+        }
+      ],
+      "slab": {
+        "outline": [
+          [
+            -6.0,
+            -5.0
+          ],
+          [
+            6.0,
+            -5.0
+          ],
+          [
+            6.0,
+            5.0
+          ],
+          [
+            -6.0,
+            5.0
+          ]
+        ],
+        "thickness": 0.2
+      }
+    },
+    {
+      "id": "floor-2",
+      "floor_number": 2,
+      "base_height": 3.0,
+      "height": 3.0,
+      "walls": [
+        {
+          "start": [
+            -6.0,
+            -5.0
+          ],
+          "end": [
+            6.0,
+            -5.0
+          ],
+          "thickness": 0.2
+        },
+        {
+          "start": [
+            6.0,
+            -5.0
+          ],
+          "end": [
+            6.0,
+            5.0
+          ],
+          "thickness": 0.2
+        },
+        {
+          "start": [
+            6.0,
+            5.0
+          ],
+          "end": [
+            -6.0,
+            5.0
+          ],
+          "thickness": 0.2
+        },
+        {
+          "start": [
+            -6.0,
+            5.0
+          ],
+          "end": [
+            -6.0,
+            -5.0
+          ],
+          "thickness": 0.2
+        }
+      ],
+      "windows": [
+        {
+          "position": [
+            -3.0,
+            -5.0
+          ],
+          "width": 1.5,
+          "height": 1.2,
+          "sill_height": 1.0,
+          "rotation": 0.0
+        },
+        {
+          "position": [
+            3.0,
+            -5.0
+          ],
+          "width": 1.5,
+          "height": 1.2,
+          "sill_height": 1.0,
+          "rotation": 0.0
+        },
+        {
+          "position": [
+            6.0,
+            -2.0
+          ],
+          "width": 1.5,
+          "height": 1.2,
+          "sill_height": 1.0,
+          "rotation": 1.5707963267948966
+        },
+        {
+          "position": [
+            6.0,
+            2.0
+          ],
+          "width": 1.5,
+          "height": 1.2,
+          "sill_height": 1.0,
+          "rotation": 1.5707963267948966
+        },
+        {
+          "position": [
+            0.0,
+            5.0
+          ],
+          "width": 1.5,
+          "height": 1.2,
+          "sill_height": 1.0,
+          "rotation": 3.141592653589793
+        },
+        {
+          "position": [
+            -6.0,
+            0.0
+          ],
+          "width": 1.5,
+          "height": 1.2,
+          "sill_height": 1.0,
+          "rotation": -1.5707963267948966
+        }
+      ],
+      "doors": [],
+      "slab": {
+        "outline": [
+          [
+            -6.0,
+            -5.0
+          ],
+          [
+            6.0,
+            -5.0
+          ],
+          [
+            6.0,
+            5.0
+          ],
+          [
+            -6.0,
+            5.0
+          ]
+        ],
+        "thickness": 0.2
+      }
+    },
+    {
+      "id": "roof",
+      "floor_number": 3,
+      "base_height": 6.0,
+      "height": 0.3,
+      "walls": [],
+      "windows": [],
+      "doors": [],
+      "slab": {
+        "outline": [
+          [
+            -6.0,
+            -5.0
+          ],
+          [
+            6.0,
+            -5.0
+          ],
+          [
+            6.0,
+            5.0
+          ],
+          [
+            -6.0,
+            5.0
+          ]
+        ],
+        "thickness": 0.3
+      }
+    }
+  ],
+  "metadata": {
+    "num_floors": 3,
+    "total_height": 6.3
+  }
+}
