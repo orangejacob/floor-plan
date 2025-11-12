@@ -304,16 +304,57 @@
                 return;
             }
 
-            showStatus('Processing floor plan... This may take a moment.', 'info');
+            showStatus('🔄 Processing floor plan image... Analyzing walls and openings...', 'info');
 
             const floorNumber = parseInt(document.getElementById('floorNumber').value);
             const width = parseFloat(document.getElementById('buildingWidth').value);
             const depth = parseFloat(document.getElementById('buildingDepth').value);
             const height = parseFloat(document.getElementById('ceilingHeight').value);
 
-            // Since we can't run Python directly from browser,
-            // create a simple floor plan based on dimensions
-            const buildingData = {
+            try {
+                // Dynamically import the image processor
+                const { FloorPlanImageProcessor } = await import('/src/image-processor.js');
+                const processor = new FloorPlanImageProcessor();
+
+                // Process the image
+                const buildingData = await processor.processImage(selectedFile, {
+                    realWidth: width,
+                    realDepth: depth,
+                    floorHeight: height,
+                    floorNumber: floorNumber,
+                    threshold: 128 // Adjust for different image types
+                });
+
+                console.log('✓ Image processed:', buildingData);
+
+                // Store in localStorage
+                localStorage.setItem('building_data', JSON.stringify(buildingData));
+
+                showStatus('✅ Floor plan processed successfully! Redirecting to 3D viewer...', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Image processing error:', error);
+                showStatus('⚠️ Advanced processing failed. Creating simplified model from dimensions...', 'info');
+
+                // Fallback to simple model
+                const buildingData = createSimpleBuilding(width, depth, height, floorNumber);
+
+                localStorage.setItem('building_data', JSON.stringify(buildingData));
+
+                showStatus('✓ Simplified model created! Redirecting...', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+            }
+        }
+
+        function createSimpleBuilding(width, depth, height, floorNumber) {
+            return {
                 version: '1.0',
                 floors: [{
                     id: `floor-${floorNumber}`,
@@ -350,15 +391,6 @@
                     total_height: height
                 }
             };
-
-            // Save to localStorage temporarily
-            localStorage.setItem('building_data', JSON.stringify(buildingData));
-
-            showStatus('✓ Floor plan processed successfully! Redirecting to 3D viewer...', 'success');
-
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1500);
         }
 
         function reset() {

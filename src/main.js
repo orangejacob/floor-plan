@@ -62,8 +62,8 @@ class FloorPlanViewer {
         this.buildingLoader = new BuildingLoader(this.scene);
         this.loadBuilding();
 
-        // Sunlight simulator
-        this.sunlightSim = new SunlightSimulator(this.scene, this.sunLight);
+        // Sunlight simulator with volumetric rays
+        this.sunlightSim = new SunlightSimulator(this.scene, this.sunLight, this.camera, this.renderer);
         this.setupUIControls();
 
         // Add ground plane
@@ -451,6 +451,11 @@ class FloorPlanViewer {
 
         const delta = this.clock.getDelta();
         this.updateMovement(delta);
+
+        // Update volumetric sun effect
+        if (this.sunlightSim) {
+            this.sunlightSim.update();
+        }
 
         this.renderer.render(this.scene, this.camera);
     }

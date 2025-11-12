@@ -1,19 +1,20 @@
 import * as THREE from 'three';
 import SunCalc from 'suncalc';
+import { VolumetricSun } from './volumetric-sun.js';
 
 export class SunlightSimulator {
-    constructor(scene, sunLight, latitude = 40.7128, longitude = -74.0060) {
+    constructor(scene, sunLight, camera, renderer, latitude = 40.7128, longitude = -74.0060) {
         this.scene = scene;
         this.sunLight = sunLight;
+        this.camera = camera;
+        this.renderer = renderer;
         this.latitude = latitude;   // Default: New York
         this.longitude = longitude;
 
-        // Add sun helper (visual indicator)
-        this.sunHelper = new THREE.Mesh(
-            new THREE.SphereGeometry(2, 16, 16),
-            new THREE.MeshBasicMaterial({ color: 0xffff00 })
-        );
-        this.scene.add(this.sunHelper);
+        // Add volumetric sun with god rays
+        this.volumetricSun = new VolumetricSun(scene, camera, renderer);
+
+        console.log(`✓ Sun simulator initialized at ${latitude.toFixed(4)}°N, ${Math.abs(longitude).toFixed(4)}°${longitude < 0 ? 'W' : 'E'}`);
     }
 
     updateSunPosition(date, hour) {
@@ -45,8 +46,8 @@ export class SunlightSimulator {
         this.sunLight.target.position.set(0, 0, 0);
         this.sunLight.target.updateMatrixWorld();
 
-        // Update visual helper
-        this.sunHelper.position.copy(this.sunLight.position);
+        // Update volumetric sun visual
+        this.volumetricSun.updatePosition(this.sunLight.position);
 
         // Adjust light intensity based on sun altitude
         if (altitude > 0) {
@@ -70,7 +71,14 @@ export class SunlightSimulator {
             this.scene.fog.color.setHex(0x111133);
         }
 
-        console.log(`Sun updated: ${dateTime.toLocaleString()}, altitude: ${(altitude * 180 / Math.PI).toFixed(1)}°`);
+        console.log(`☀️ Sun: ${dateTime.toLocaleTimeString()}, altitude: ${(altitude * 180 / Math.PI).toFixed(1)}°, azimuth: ${(azimuth * 180 / Math.PI).toFixed(1)}°`);
+    }
+
+    update() {
+        // Update volumetric sun effect
+        if (this.volumetricSun) {
+            this.volumetricSun.update();
+        }
     }
 
     calculateColorTemperature(altitude) {

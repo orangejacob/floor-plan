@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { RealisticTextureGenerator } from './realistic-textures.js';
 
 export class BuildingLoader {
     constructor(scene) {
@@ -10,12 +11,15 @@ export class BuildingLoader {
             'roof': true
         };
 
-        // Create procedural textures for realistic materials
+        // Create realistic PBR textures
+        this.textureGen = new RealisticTextureGenerator();
         this.textures = {
-            noise: this.createNoiseTexture(512, 0.3),
-            bump: this.createBumpTexture(512),
-            wood: this.createWoodTexture(512)
+            concrete: this.textureGen.generateConcreteTexture(1024),
+            brick: this.textureGen.generateBrickTexture(1024),
+            wood: this.textureGen.generateWoodTexture(1024)
         };
+
+        console.log('✓ Realistic textures generated');
     }
 
     createNoiseTexture(size, intensity) {
@@ -123,47 +127,56 @@ export class BuildingLoader {
         const baseHeight = floorData.base_height || 0;
         const floorHeight = floorData.height || 3;
 
-        // Realistic materials with textures
+        // Realistic PBR materials with full texture maps
+        const concrete = this.textures.concrete;
         const wallMaterial = new THREE.MeshStandardMaterial({
-            color: 0xf5f5f5,
-            roughness: 0.85,
-            metalness: 0.0,
-            map: this.textures.noise.clone(),
-            normalMap: this.textures.bump.clone(),
-            normalScale: new THREE.Vector2(0.3, 0.3)
+            map: concrete.map.clone(),
+            normalMap: concrete.normalMap.clone(),
+            roughnessMap: concrete.roughnessMap.clone(),
+            aoMap: concrete.aoMap.clone(),
+            normalScale: new THREE.Vector2(0.5, 0.5),
+            aoMapIntensity: 0.5
         });
+        wallMaterial.map.needsUpdate = true;
 
+        // Photorealistic glass
         const windowMaterial = new THREE.MeshPhysicalMaterial({
-            color: 0xddf4ff,
+            color: 0xffffff,
             roughness: 0.05,
-            metalness: 0.1,
+            metalness: 0.0,
             transparent: true,
-            opacity: 0.3,
-            transmission: 0.9,
+            opacity: 0.1,
+            transmission: 0.95,
             thickness: 0.5,
-            ior: 1.5,
+            ior: 1.52, // Real glass IOR
             clearcoat: 1.0,
-            clearcoatRoughness: 0.1,
-            side: THREE.DoubleSide
+            clearcoatRoughness: 0.05,
+            side: THREE.DoubleSide,
+            envMapIntensity: 1.0
         });
 
+        // Realistic wood door
+        const wood = this.textures.wood;
         const doorMaterial = new THREE.MeshStandardMaterial({
-            color: 0x8B6F47,
-            roughness: 0.65,
-            metalness: 0.0,
-            map: this.textures.wood.clone(),
-            normalMap: this.textures.wood.clone(),
-            normalScale: new THREE.Vector2(0.5, 0.5)
+            map: wood.map.clone(),
+            normalMap: wood.normalMap.clone(),
+            roughnessMap: wood.roughnessMap.clone(),
+            aoMap: wood.aoMap.clone(),
+            normalScale: new THREE.Vector2(0.8, 0.8),
+            aoMapIntensity: 0.3
         });
+        doorMaterial.map.needsUpdate = true;
 
+        // Concrete floor
         const floorMaterial = new THREE.MeshStandardMaterial({
-            color: 0xc8c8c8,
-            roughness: 0.9,
-            metalness: 0.0,
-            map: this.textures.bump.clone(),
-            normalMap: this.textures.bump.clone(),
-            normalScale: new THREE.Vector2(0.2, 0.2)
+            map: concrete.map.clone(),
+            normalMap: concrete.normalMap.clone(),
+            roughnessMap: concrete.roughnessMap.clone(),
+            aoMap: concrete.aoMap.clone(),
+            normalScale: new THREE.Vector2(0.3, 0.3),
+            aoMapIntensity: 0.6
         });
+        floorMaterial.map.needsUpdate = true;
 
         // Create walls
         if (floorData.walls) {
