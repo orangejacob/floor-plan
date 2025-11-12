@@ -1,0 +1,9 @@
+# Python dependencies for floor plan processing
+
+# Computer vision for image-based floor plan parsing
+opencv-python>=4.8.0
+numpy>=1.24.0
+
+# Optional: for advanced image processing
+# Pillow>=10.0.0
+# scikit-image>=0.21.0

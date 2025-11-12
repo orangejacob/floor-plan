@@ -9,11 +9,99 @@ export class BuildingLoader {
             'floor-2': true,
             'roof': true
         };
+
+        // Create procedural textures for realistic materials
+        this.textures = {
+            noise: this.createNoiseTexture(512, 0.3),
+            bump: this.createBumpTexture(512),
+            wood: this.createWoodTexture(512)
+        };
+    }
+
+    createNoiseTexture(size, intensity) {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        const imageData = ctx.createImageData(size, size);
+        for (let i = 0; i < imageData.data.length; i += 4) {
+            const noise = Math.random() * intensity * 255;
+            imageData.data[i] = 128 + noise;
+            imageData.data[i + 1] = 128 + noise;
+            imageData.data[i + 2] = 128 + noise;
+            imageData.data[i + 3] = 255;
+        }
+        ctx.putImageData(imageData, 0, 0);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(2, 2);
+        return texture;
+    }
+
+    createBumpTexture(size) {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        // Create subtle bump pattern
+        for (let y = 0; y < size; y++) {
+            for (let x = 0; x < size; x++) {
+                const noise = Math.sin(x * 0.1) * Math.cos(y * 0.1) * 20 + Math.random() * 30;
+                const value = 128 + noise;
+                ctx.fillStyle = `rgb(${value}, ${value}, ${value})`;
+                ctx.fillRect(x, y, 1, 1);
+            }
+        }
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(4, 4);
+        return texture;
+    }
+
+    createWoodTexture(size) {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        // Create wood grain pattern
+        for (let y = 0; y < size; y++) {
+            for (let x = 0; x < size; x++) {
+                const grain = Math.sin(y * 0.3 + Math.random() * 0.5) * 25;
+                const noise = Math.random() * 15;
+                const value = 100 + grain + noise;
+                ctx.fillStyle = `rgb(${value * 0.8}, ${value * 0.6}, ${value * 0.4})`;
+                ctx.fillRect(x, y, 1, 1);
+            }
+        }
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(1, 3);
+        return texture;
     }
 
     async loadFromJSON(path) {
-        const response = await fetch(path);
-        const buildingData = await response.json();
+        let buildingData;
+
+        // Check if data was uploaded via the upload interface
+        const uploadedData = localStorage.getItem('building_data');
+        if (uploadedData) {
+            console.log('Loading building from uploaded data');
+            buildingData = JSON.parse(uploadedData);
+            localStorage.removeItem('building_data'); // Clear after loading
+        } else {
+            // Load from file
+            const response = await fetch(path);
+            buildingData = await response.json();
+        }
 
         console.log('Loading building data:', buildingData);
 
@@ -35,29 +123,46 @@ export class BuildingLoader {
         const baseHeight = floorData.base_height || 0;
         const floorHeight = floorData.height || 3;
 
-        // Materials
+        // Realistic materials with textures
         const wallMaterial = new THREE.MeshStandardMaterial({
-            color: 0xdddddd,
-            roughness: 0.7,
-            metalness: 0.1
+            color: 0xf5f5f5,
+            roughness: 0.85,
+            metalness: 0.0,
+            map: this.textures.noise.clone(),
+            normalMap: this.textures.bump.clone(),
+            normalScale: new THREE.Vector2(0.3, 0.3)
         });
 
-        const windowMaterial = new THREE.MeshStandardMaterial({
-            color: 0x88ccee,
-            roughness: 0.1,
-            metalness: 0.9,
+        const windowMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0xddf4ff,
+            roughness: 0.05,
+            metalness: 0.1,
             transparent: true,
-            opacity: 0.4
+            opacity: 0.3,
+            transmission: 0.9,
+            thickness: 0.5,
+            ior: 1.5,
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.1,
+            side: THREE.DoubleSide
         });
 
         const doorMaterial = new THREE.MeshStandardMaterial({
-            color: 0x8B4513,
-            roughness: 0.8
+            color: 0x8B6F47,
+            roughness: 0.65,
+            metalness: 0.0,
+            map: this.textures.wood.clone(),
+            normalMap: this.textures.wood.clone(),
+            normalScale: new THREE.Vector2(0.5, 0.5)
         });
 
         const floorMaterial = new THREE.MeshStandardMaterial({
-            color: 0xAAAAAA,
-            roughness: 0.9
+            color: 0xc8c8c8,
+            roughness: 0.9,
+            metalness: 0.0,
+            map: this.textures.bump.clone(),
+            normalMap: this.textures.bump.clone(),
+            normalScale: new THREE.Vector2(0.2, 0.2)
         });
 
         // Create walls

@@ -284,6 +284,12 @@ class FloorPlanParser:
         )
         floor.doors.append(door)
 
+    def create_slab_from_points(self, points: List[Point2D]) -> Slab:
+        """
+        Create a slab from a list of 2D points
+        """
+        return Slab(points, thickness=0.2)
+
     def create_building(self, floors: List[Floor]) -> Dict:
         """
         Combines multiple floors into a single building structure

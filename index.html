@@ -85,6 +85,10 @@
         <h2>🏢 Building Viewer</h2>
 
         <div class="control-group">
+            <button id="upload-btn" style="width: 100%; margin-bottom: 15px; background: #4CAF50; padding: 10px; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 14px;">📤 Upload New Floor Plan</button>
+        </div>
+
+        <div class="control-group">
             <label>Time of Day: <span class="value-display" id="time-display">12:00</span></label>
             <input type="range" id="time-slider" min="0" max="24" step="0.5" value="12">
         </div>
@@ -107,9 +111,19 @@
     </div>
 
     <div id="info">
-        <strong>Controls:</strong> WASD/Arrow Keys = Move | Mouse = Look | Space = Up | Shift = Down
+        <strong>Controls:</strong> WASD/Arrow Keys = Move | Mouse = Look | Space = Up | Shift = Down | Click canvas to enable
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadBtn = document.getElementById('upload-btn');
+            if (uploadBtn) {
+                uploadBtn.addEventListener('click', () => {
+                    window.location.href = 'upload.html';
+                });
+            }
+        });
+    </script>
     <script type="module" src="/src/main.js"></script>
 </body>
 </html>

@@ -27,10 +27,14 @@ class FloorPlanViewer {
     }
 
     init() {
-        // Renderer setup
+        // Renderer setup with realistic tone mapping
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this.renderer.toneMappingExposure = 1.0;
+        this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+        this.renderer.physicallyCorrectLights = true;
         document.getElementById('canvas-container').appendChild(this.renderer.domElement);
 
         // Camera position (inside the building)
@@ -166,10 +170,20 @@ class FloorPlanViewer {
     }
 
     addGround() {
-        const groundGeometry = new THREE.PlaneGeometry(200, 200);
+        const groundGeometry = new THREE.PlaneGeometry(200, 200, 50, 50);
+
+        // Add subtle terrain variation
+        const positions = groundGeometry.attributes.position;
+        for (let i = 0; i < positions.count; i++) {
+            const z = positions.getZ(i);
+            positions.setZ(i, z + Math.random() * 0.1);
+        }
+        groundGeometry.computeVertexNormals();
+
         const groundMaterial = new THREE.MeshStandardMaterial({
-            color: 0x4a7c3b,
-            roughness: 0.8
+            color: 0x567d46,
+            roughness: 0.95,
+            metalness: 0.0
         });
         const ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.rotation.x = -Math.PI / 2;
@@ -179,26 +193,39 @@ class FloorPlanViewer {
     }
 
     addEnvironment() {
-        // Add a simple neighboring building to demonstrate view obstruction
+        // Add realistic neighboring buildings to demonstrate view obstruction
         const neighborMaterial = new THREE.MeshStandardMaterial({
-            color: 0x8B8B8B,
-            roughness: 0.7
+            color: 0xd4d4d4,
+            roughness: 0.85,
+            metalness: 0.0
         });
 
-        const neighbor = new THREE.Mesh(
-            new THREE.BoxGeometry(15, 12, 10),
+        // Building 1
+        const neighbor1 = new THREE.Mesh(
+            new THREE.BoxGeometry(15, 18, 12),
             neighborMaterial
         );
-        neighbor.position.set(25, 6, -10);
-        neighbor.castShadow = true;
-        neighbor.receiveShadow = true;
-        this.scene.add(neighbor);
+        neighbor1.position.set(25, 9, -10);
+        neighbor1.castShadow = true;
+        neighbor1.receiveShadow = true;
+        this.scene.add(neighbor1);
 
-        // Add some trees (simple cylinders + spheres)
-        for (let i = 0; i < 5; i++) {
-            const tree = this.createSimpleTree();
-            const angle = (i / 5) * Math.PI * 2;
-            const radius = 20 + Math.random() * 10;
+        // Building 2
+        const neighbor2 = new THREE.Mesh(
+            new THREE.BoxGeometry(12, 15, 15),
+            neighborMaterial.clone()
+        );
+        neighbor2.material.color.setHex(0xb8b8b8);
+        neighbor2.position.set(-30, 7.5, 5);
+        neighbor2.castShadow = true;
+        neighbor2.receiveShadow = true;
+        this.scene.add(neighbor2);
+
+        // Add more realistic trees
+        for (let i = 0; i < 8; i++) {
+            const tree = this.createRealisticTree();
+            const angle = (i / 8) * Math.PI * 2;
+            const radius = 20 + Math.random() * 15;
             tree.position.set(
                 Math.cos(angle) * radius,
                 0,
@@ -208,26 +235,40 @@ class FloorPlanViewer {
         }
     }
 
-    createSimpleTree() {
+    createRealisticTree() {
         const group = new THREE.Group();
 
-        // Trunk
-        const trunk = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.3, 0.4, 3, 8),
-            new THREE.MeshStandardMaterial({ color: 0x4d3319 })
-        );
-        trunk.position.y = 1.5;
+        // Realistic trunk
+        const trunkGeometry = new THREE.CylinderGeometry(0.25, 0.35, 4, 12);
+        const trunkMaterial = new THREE.MeshStandardMaterial({
+            color: 0x3d2817,
+            roughness: 0.9,
+            metalness: 0.0
+        });
+        const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+        trunk.position.y = 2;
         trunk.castShadow = true;
+        trunk.receiveShadow = true;
         group.add(trunk);
 
-        // Foliage
-        const foliage = new THREE.Mesh(
-            new THREE.SphereGeometry(2, 8, 8),
-            new THREE.MeshStandardMaterial({ color: 0x2d5016 })
-        );
-        foliage.position.y = 4;
-        foliage.castShadow = true;
-        group.add(foliage);
+        // Layered foliage for realism
+        const foliageMaterial = new THREE.MeshStandardMaterial({
+            color: 0x2a5018,
+            roughness: 0.9,
+            metalness: 0.0
+        });
+
+        for (let i = 0; i < 3; i++) {
+            const foliage = new THREE.Mesh(
+                new THREE.SphereGeometry(1.5 - i * 0.3, 12, 12),
+                foliageMaterial.clone()
+            );
+            foliage.material.color.multiplyScalar(1 + i * 0.1);
+            foliage.position.y = 4 + i * 0.8;
+            foliage.castShadow = true;
+            foliage.receiveShadow = true;
+            group.add(foliage);
+        }
 
         return group;
     }
@@ -349,22 +390,34 @@ class FloorPlanViewer {
         this.velocity.z -= this.velocity.z * 10.0 * delta;
         this.velocity.y -= this.velocity.y * 10.0 * delta;
 
-        // Direction
+        // Calculate movement direction
         const direction = new THREE.Vector3();
+        const forward = new THREE.Vector3();
+        const right = new THREE.Vector3();
 
-        if (this.moveState.forward) direction.z -= 1;
-        if (this.moveState.backward) direction.z += 1;
-        if (this.moveState.left) direction.x -= 1;
-        if (this.moveState.right) direction.x += 1;
+        this.camera.getWorldDirection(forward);
+        forward.y = 0; // Keep movement horizontal
+        forward.normalize();
 
-        if (direction.length() > 0) direction.normalize();
+        right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
 
-        // Apply movement
-        if (this.moveState.forward || this.moveState.backward) {
-            this.velocity.z -= direction.z * this.moveSpeed * delta;
+        if (this.moveState.forward) {
+            direction.add(forward);
         }
-        if (this.moveState.left || this.moveState.right) {
-            this.velocity.x -= direction.x * this.moveSpeed * delta;
+        if (this.moveState.backward) {
+            direction.sub(forward);
+        }
+        if (this.moveState.right) {
+            direction.add(right);
+        }
+        if (this.moveState.left) {
+            direction.sub(right);
+        }
+
+        if (direction.length() > 0) {
+            direction.normalize();
+            this.velocity.x += direction.x * this.moveSpeed * delta;
+            this.velocity.z += direction.z * this.moveSpeed * delta;
         }
 
         // Vertical movement
@@ -375,10 +428,10 @@ class FloorPlanViewer {
             this.velocity.y -= this.moveSpeed * delta;
         }
 
-        // Move camera
-        this.controls.moveRight(-this.velocity.x * delta);
-        this.controls.moveForward(-this.velocity.z * delta);
-        this.camera.position.y += this.velocity.y * delta;
+        // Apply velocity to camera position
+        this.camera.position.x += this.velocity.x;
+        this.camera.position.y += this.velocity.y;
+        this.camera.position.z += this.velocity.z;
 
         // Keep camera above ground
         if (this.camera.position.y < 0.5) {

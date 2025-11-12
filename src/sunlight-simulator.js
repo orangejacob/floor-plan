@@ -32,11 +32,16 @@ export class SunlightSimulator {
         // Convert spherical to Cartesian coordinates
         const distance = 50;
         const x = distance * Math.cos(altitude) * Math.sin(azimuth);
-        const y = distance * Math.sin(altitude);
+        const y = Math.max(5, distance * Math.sin(altitude)); // Ensure sun is above horizon
         const z = distance * Math.cos(altitude) * Math.cos(azimuth);
 
         // Update sun light position
         this.sunLight.position.set(x, y, z);
+
+        // Add target to scene if not already added
+        if (!this.sunLight.target.parent) {
+            this.scene.add(this.sunLight.target);
+        }
         this.sunLight.target.position.set(0, 0, 0);
         this.sunLight.target.updateMatrixWorld();
 
